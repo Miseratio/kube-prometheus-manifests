@@ -10,7 +10,7 @@ local table = grafana70.panel.table;
 
 {
 
-  new(config=null, platform=null, uid=null):: {
+  new(config=null, platform=null):: {
 
     local prometheusDatasourceTemplate = {
       current: {
@@ -147,19 +147,7 @@ local table = grafana70.panel.table;
           ||| % config, legendFormat='App Memory'
         ))
         .addTarget(prometheus.target('node_memory_wired_bytes{%(nodeExporterSelector)s, instance="$instance", %(clusterLabel)s="$cluster"}' % config, legendFormat='Wired Memory'))
-        .addTarget(prometheus.target('node_memory_compressed_bytes{%(nodeExporterSelector)s, instance="$instance", %(clusterLabel)s="$cluster"}' % config, legendFormat='Compressed'))
-      else if platform == 'AIX' then
-        memoryGraphPanelPrototype { stack: false }
-        .addTarget(prometheus.target('node_memory_total_bytes{%(nodeExporterSelector)s, instance="$instance", %(clusterLabel)s="$cluster"}' % config, legendFormat='Physical Memory'))
-        .addTarget(prometheus.target(
-          |||
-            (
-                node_memory_total_bytes{%(nodeExporterSelector)s, instance="$instance", %(clusterLabel)s="$cluster"} -
-                node_memory_available_bytes{%(nodeExporterSelector)s, instance="$instance", %(clusterLabel)s="$cluster"}
-            )
-          ||| % config, legendFormat='Memory Used'
-        )),
-
+        .addTarget(prometheus.target('node_memory_compressed_bytes{%(nodeExporterSelector)s, instance="$instance", %(clusterLabel)s="$cluster"}' % config, legendFormat='Compressed')),
 
     // NOTE: avg() is used to circumvent a label change caused by a node_exporter rollout.
     local memoryGaugePanelPrototype =
@@ -206,20 +194,7 @@ local table = grafana70.panel.table;
             *
             100
           ||| % config
-        ))
-      else if platform == 'AIX' then
-        memoryGaugePanelPrototype
-        .addTarget(prometheus.target(
-          |||
-            100 -
-            (
-              avg(node_memory_available_bytes{%(nodeExporterSelector)s, instance="$instance", %(clusterLabel)s="$cluster"}) /
-              avg(node_memory_total_bytes{%(nodeExporterSelector)s, instance="$instance", %(clusterLabel)s="$cluster"})
-              * 100
-            )
-          ||| % config
         )),
-
 
     local diskIO =
       graphPanel.new(
@@ -526,7 +501,6 @@ local table = grafana70.panel.table;
         tags=(config.dashboardTags),
         timezone='utc',
         refresh='30s',
-        uid=std.md5(uid),
         graphTooltip='shared_crosshair'
       )
       .addTemplates(templates)
@@ -538,19 +512,6 @@ local table = grafana70.panel.table;
         tags=(config.dashboardTags),
         timezone='utc',
         refresh='30s',
-        uid=std.md5(uid),
-        graphTooltip='shared_crosshair'
-      )
-      .addTemplates(templates)
-      .addRows(rows)
-    else if platform == 'AIX' then
-      dashboard.new(
-        '%sAIX' % config.dashboardNamePrefix,
-        time_from='now-1h',
-        tags=(config.dashboardTags),
-        timezone='utc',
-        refresh='30s',
-        uid=std.md5(uid),
         graphTooltip='shared_crosshair'
       )
       .addTemplates(templates)

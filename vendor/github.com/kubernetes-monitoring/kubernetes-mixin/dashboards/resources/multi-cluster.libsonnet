@@ -62,7 +62,7 @@ local var = g.dashboard.variable;
             statPanel(
               'CPU Utilisation',
               'none',
-              'sum(cluster:node_cpu:ratio_rate5m) / count(cluster:node_cpu:ratio_rate5m)'
+              'cluster:node_cpu:ratio_rate5m'
             ),
 
             statPanel(
@@ -126,7 +126,7 @@ local var = g.dashboard.variable;
             + g.panel.table.queryOptions.withTransformations([
               g.panel.table.queryOptions.transformation.withId('joinByField')
               + g.panel.table.queryOptions.transformation.withOptions({
-                byField: std.format('%s', $._config.clusterLabel),
+                byField: 'cluster',
                 mode: 'outer',
               }),
 
@@ -225,7 +225,7 @@ local var = g.dashboard.variable;
             + g.panel.table.queryOptions.withTransformations([
               g.panel.table.queryOptions.transformation.withId('joinByField')
               + g.panel.table.queryOptions.transformation.withOptions({
-                byField: std.format('%s', $._config.clusterLabel),
+                byField: 'cluster',
                 mode: 'outer',
               }),
 

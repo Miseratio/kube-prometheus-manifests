@@ -65,9 +65,9 @@ spec:
         severity: warning
     - alert: PrometheusErrorSendingAlertsToSomeAlertmanagers
       annotations:
-        description: '{{ printf "%.1f" $value }}% of alerts sent by Prometheus {{$labels.namespace}}/{{$labels.pod}} to Alertmanager {{$labels.alertmanager}} were affected by errors.'
+        description: '{{ printf "%.1f" $value }}% errors while sending alerts from Prometheus {{$labels.namespace}}/{{$labels.pod}} to Alertmanager {{$labels.alertmanager}}.'
         runbook_url: https://runbooks.prometheus-operator.dev/runbooks/prometheus/prometheuserrorsendingalertstosomealertmanagers
-        summary: More than 1% of alerts sent by Prometheus to a specific Alertmanager were affected by errors.
+        summary: Prometheus has encountered more than 1% errors sending alerts to a specific Alertmanager.
       expr: |
         (
           rate(prometheus_notifications_errors_total{job="prometheus-k8s",namespace="cl2-monitoring"}[5m])
